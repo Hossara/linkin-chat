@@ -1,3 +1,6 @@
 .idea
 server-config.json
 vendor
+
+# Added by goreleaser init:
+dist/

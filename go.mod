@@ -1,4 +1,4 @@
-module linkin-chat
+module github.com/Hossara/linkin-chat
 
 go 1.23.5
 
