@@ -18,5 +18,5 @@ var joinCmd = &cobra.Command{
 func SetJoinCommand(cmd *cobra.Command) {
 	cmd.AddCommand(joinCmd)
 
-	joinCmd.Flags().StringP("server", "s", "localhost:4222", "NATS server address")
+	joinCmd.Flags().StringP("server", "s", "localhost", "Server address")
 }
