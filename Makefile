@@ -5,10 +5,12 @@ NETWORK_NAME=linkin-chat-network
 
 DEV_COMPOSE:= \
 		-f $(ROOT_DIR)/nats/docker-compose.yaml \
+		-f $(ROOT_DIR)/redis/docker-compose.dev.yaml \
 		-f $(ROOT_DIR)/postgres/docker-compose.dev.yaml \
 
 PROD_COMPOSE:= \
 		-f $(ROOT_DIR)/nats/docker-compose.yaml \
+		-f $(ROOT_DIR)/redis/docker-compose.prod.yaml \
 		-f $(ROOT_DIR)/postgres/docker-compose.prod.yaml \
 		-f $(ROOT_DIR)/server/docker-compose.yaml
 

@@ -8,6 +8,8 @@ services:
       - linkin-chat-network
     env_file: ./postgres/.env
     restart: always
+    depends_on:
+      - linkin-chat-nats
 
 networks:
   linkin-chat-network:

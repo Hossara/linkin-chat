@@ -1,9 +1,10 @@
 package config
 
 type ServerConfig struct {
-	DB     DBConfig `json:"db"`
-	Server Server   `json:"server"`
-	Nats   Nats     `json:"nats"`
+	DB     DBConfig    `json:"db"`
+	Server Server      `json:"server"`
+	Redis  RedisConfig `json:"redis"`
+	Nats   Nats        `json:"nats"`
 }
 
 type DBConfig struct {
@@ -19,12 +20,15 @@ type Server struct {
 	Port                  uint   `json:"port"`
 	Secret                string `json:"secret"`
 	PasswordSecret        string `json:"password_secret"`
-	OtpTtlMinutes         uint   `json:"otp_ttl_minutes"`
 	MaxRequestsPerSecond  uint   `json:"maxRequestsPerSecond"`
 	AuthExpirationMinutes uint   `json:"auth_expiration_minutes"`
 	AuthRefreshMinutes    uint   `json:"auth_refresh_minutes"`
 }
 
+type RedisConfig struct {
+	Host string `json:"host"`
+	Port uint   `json:"port"`
+}
 type Nats struct {
 	Host string `json:"host"`
 	Port uint   `json:"port"`
