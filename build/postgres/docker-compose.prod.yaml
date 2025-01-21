@@ -1,0 +1,19 @@
+services:
+  linkin-chat-db:
+    image: postgis/postgis:13-3.4
+    container_name: linkin-chat-db
+    volumes:
+      - linkin-chat-db-volume:/var/lib/postgresql/data
+    networks:
+      - linkin-chat-network
+    env_file: ./postgres/.env
+    restart: always
+
+networks:
+  linkin-chat-network:
+    name: linkin-chat-network
+    external: true
+
+volumes:
+  linkin-chat-db-volume:
+    driver: local

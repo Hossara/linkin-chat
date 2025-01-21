@@ -22,5 +22,5 @@ func SetLoginCommand(cmd *cobra.Command) {
 
 	loginCmd.Flags().StringP("username", "u", "", "LinkinChat account username")
 	loginCmd.Flags().StringP("password", "p", "", "LinkinChat account password")
-	joinCmd.Flags().StringP("server", "s", "localhost", "Server address")
+	loginCmd.Flags().StringP("server", "s", "localhost", "Server address")
 }

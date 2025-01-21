@@ -1,0 +1,14 @@
+services:
+  linkin-chat-db:
+    image: postgis/postgis:13-3.4
+    container_name: linkin-chat-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - linkin-chat-db-volume:/var/lib/postgresql/data
+    env_file: ./postgres/.env
+    restart: always
+
+volumes:
+  linkin-chat-db-volume:
+    driver: local
