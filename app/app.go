@@ -1,6 +1,12 @@
 package app
 
 import (
+	"github.com/Hossara/linkin-chat/internal/user"
+	"github.com/Hossara/linkin-chat/pkg/adapters/database"
+	"gorm.io/gorm"
+
+	userPort "github.com/Hossara/linkin-chat/internal/user/port"
+
 	"github.com/Hossara/linkin-chat/config"
 	"github.com/Hossara/linkin-chat/pkg/postgres"
 )
@@ -8,6 +14,8 @@ import (
 type app struct {
 	cfg config.ServerConfig
 	db  *gorm.DB
+
+	userService userPort.Service
 }
 
 func (a *app) DB() *gorm.DB {
@@ -34,6 +42,20 @@ func (a *app) setDB() error {
 
 	a.db = db
 	return nil
+}
+
+func (a *app) UserService() userPort.Service {
+	if a.userService == nil {
+		a.userService = user.NewService(database.NewUserRepo(a.db))
+
+		/*if err := a.userService.RunMigrations(); err != nil {
+			panic("failed to run migrations for user service!")
+		}*/
+
+		return a.userService
+	}
+
+	return a.userService
 }
 
 func NewApp(cfg config.ServerConfig) (App, error) {
