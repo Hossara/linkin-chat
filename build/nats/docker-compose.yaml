@@ -1,0 +1,9 @@
+services:
+  linkin-chat-nats:
+    container_name: linkin-chat-nats
+    image: nats:2.10.24
+    volumes:
+      - ./nats/nats-server.conf:/etc/nats/nats-server.conf
+    ports:
+      - "4222:4222"
+      - "8222:8222"
