@@ -8,6 +8,8 @@ services:
       - linkin-chat-db-volume:/var/lib/postgresql/data
     env_file: ./postgres/.env
     restart: always
+    depends_on:
+      - linkin-chat-nats
 
 volumes:
   linkin-chat-db-volume:

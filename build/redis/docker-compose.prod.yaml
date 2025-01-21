@@ -1,17 +1,18 @@
 services:
-  linkin-chat-server:
-    container_name: linkin-chat-server
+  linkin-chat-redis:
+    image: redis/redis-stack:latest
+    container_name: linkin-chat-redis
     networks:
       - linkin-chat-network
-    build:
-      context: ../
-      dockerfile: build/server/Dockerfile
     volumes:
-      - "../config.json:/usr/local/bin/config.json"
+      - linkin-chat-redis-volume:/data
     depends_on:
       - linkin-chat-nats
       - linkin-chat-db
-      - linkin-chat-redis
+
+volumes:
+  linkin-chat-redis-volume:
+    driver: local
 
 networks:
   linkin-chat-network:

@@ -1,8 +1,7 @@
 {
   "server": {
     "port": "8080",
-    "otp_ttl_minutes": 5,
-    "password_secret": "dnodnond",
+    "password_secret": "your_password_secret_key",
     "secret": "your_jwt_secret_key",
     "auth_expiration_minutes": 60,
     "auth_refresh_minutes": 1440
@@ -10,6 +9,10 @@
   "nats": {
     "host": "localhost",
     "port": "4222"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379
   },
   "db": {
     "host": "localhost",
