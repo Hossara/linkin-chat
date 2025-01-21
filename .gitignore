@@ -1,6 +1,8 @@
 .idea
-server-config.json
+config.json
 vendor
 
 # Added by goreleaser init:
 dist/
+
+*.env

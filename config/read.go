@@ -1,27 +1,33 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 )
 
-func ReadConfig(configPath string) error {
+func ReadConfig(configPath string) (*ServerConfig, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath(configPath)
 
+	// Read the config file
 	if err := viper.ReadInConfig(); err != nil {
-		if errors.As(err, &viper.ConfigFileNotFoundError{}) {
-			err = viper.WriteConfigAs(configPath)
-
-			if err != nil {
-				return fmt.Errorf("error creating config file: %w", err)
-			}
-		} else {
-			return fmt.Errorf("error reading config file: %w", err)
-		}
+		return nil, fmt.Errorf("error reading config file: %v", err)
 	}
 
-	return nil
+	// Unmarshal into the Config struct
+	var config ServerConfig
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("unable to decode into struct: %v", err)
+	}
+
+	return &config, nil
+}
+
+func MustReadConfig(path string) ServerConfig {
+	config, err := ReadConfig(path)
+	if err != nil {
+		panic(err)
+	}
+	return *config
 }
