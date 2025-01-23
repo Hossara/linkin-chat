@@ -22,9 +22,9 @@ func Login(svcGetter helpers.ServiceGetter[*services.AccountService]) fiber.Hand
 
 		response, err := svc.Login(c.UserContext(), *body)
 
-		fmt.Printf("%v\n", err)
-
 		if err != nil {
+			fmt.Printf("Error while logging in %v\n", err)
+
 			switch {
 			case errors.Is(err, services.ErrUserNotFound):
 				return c.Status(http.StatusNotFound).JSON(fiber.Map{
