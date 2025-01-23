@@ -6,6 +6,7 @@ import (
 	"github.com/Hossara/linkin-chat/pkg/adapters/database"
 	"github.com/Hossara/linkin-chat/pkg/cache"
 	"gorm.io/gorm"
+	"log"
 
 	userPort "github.com/Hossara/linkin-chat/internal/user/port"
 	redisAdapter "github.com/babyhando/order-service/pkg/adapters/cache"
@@ -57,9 +58,9 @@ func (a *app) UserService() userPort.Service {
 	if a.userService == nil {
 		a.userService = user.NewService(database.NewUserRepo(a.db))
 
-		/*if err := a.userService.RunMigrations(); err != nil {
-			panic("failed to run migrations for user service!")
-		}*/
+		if err := a.userService.RunMigrations(); err != nil {
+			log.Fatalf("failed to run migrations for user service: %v", err)
+		}
 
 		return a.userService
 	}
