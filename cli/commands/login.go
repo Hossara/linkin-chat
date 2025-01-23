@@ -2,25 +2,30 @@ package commands
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"log"
+
+	"github.com/Hossara/linkin-chat/cli/pages"
 )
 
-var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Login or create account",
+var joinCmd = &cobra.Command{
+	Use:   "join",
+	Short: "Join the chatroom",
 	Run: func(cmd *cobra.Command, args []string) {
 		username, _ := cmd.Flags().GetString("username")
 		password, _ := cmd.Flags().GetString("password")
+		server, _ := cmd.Flags().GetString("server")
 
-		if username == "" || password == "" {
+		pages.LoginPage(username, password, server)
 
-		}
+		log.Println(viper.GetString("login.token"))
 	},
 }
 
-func SetLoginCommand(cmd *cobra.Command) {
-	cmd.AddCommand(loginCmd)
+func SetJoinCommand(cmd *cobra.Command) {
+	cmd.AddCommand(joinCmd)
 
-	loginCmd.Flags().StringP("username", "u", "", "LinkinChat account username")
-	loginCmd.Flags().StringP("password", "p", "", "LinkinChat account password")
-	loginCmd.Flags().StringP("server", "s", "localhost", "Server address")
+	joinCmd.Flags().StringP("username", "u", "", "Account username")
+	joinCmd.Flags().StringP("password", "p", "", "Account password")
+	joinCmd.Flags().StringP("server", "s", "localhost", "Server address")
 }
