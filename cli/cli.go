@@ -2,11 +2,11 @@ package cli
 
 import (
 	"fmt"
-	"github.com/Hossara/linkin-chat/cli/constants"
 	"github.com/spf13/cobra"
 	"os"
 
 	"github.com/Hossara/linkin-chat/cli/commands"
+	"github.com/Hossara/linkin-chat/cli/constants"
 )
 
 var rootCmd = &cobra.Command{
