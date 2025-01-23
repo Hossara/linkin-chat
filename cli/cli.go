@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	commands.SetJoinCommand(rootCmd)
-	commands.SetLoginCommand(rootCmd)
+	commands.SetRegisterCommand(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
