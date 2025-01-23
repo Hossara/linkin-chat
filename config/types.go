@@ -22,7 +22,6 @@ type Server struct {
 	PasswordSecret        string `json:"password_secret"`
 	MaxRequestsPerSecond  uint   `json:"maxRequestsPerSecond"`
 	AuthExpirationMinutes uint   `json:"auth_expiration_minutes"`
-	AuthRefreshMinutes    uint   `json:"auth_refresh_minutes"`
 }
 
 type RedisConfig struct {
