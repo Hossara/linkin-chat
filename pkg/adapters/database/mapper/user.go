@@ -42,7 +42,7 @@ func ToModelUser(d *domain.User) *models.User {
 			DeletedAt: gorm.DeletedAt(ToNullTime(d.DeletedAt)),
 		},
 
-		ID:        models.UserID(d.ID),
+		ID:        uint(d.ID),
 		Username:  d.Username,
 		Password:  password,
 		FirstName: d.FirstName,
