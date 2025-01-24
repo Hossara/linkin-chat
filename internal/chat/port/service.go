@@ -12,7 +12,7 @@ type Service interface {
 	JoinChatRoom(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID) (chatDomain.ChatRoomCode, error)
 	ExitChatRoom(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID) (chatDomain.ChatRoomCode, error)
 	DeleteChatRoom(ctx context.Context, code chatDomain.ChatRoomCode) error
-	GetUsersChatRooms(ctx context.Context, userID userDomain.UserID) ([]*chatDomain.ChatRoom, error)
+	GetUserChatRooms(ctx context.Context, userID userDomain.UserID) ([]*chatDomain.ChatRoom, error)
 
 	GetChatRoomMessages(ctx context.Context, code chatDomain.ChatRoomCode) []*chatDomain.Message
 	NewMessage(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID, content string) error
