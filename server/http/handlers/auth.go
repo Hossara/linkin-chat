@@ -25,7 +25,8 @@ func Login(svcGetter helpers.ServiceGetter[*services.AccountService]) fiber.Hand
 			switch {
 			case errors.Is(err, services.ErrUserNotFound):
 				return c.Status(http.StatusNotFound).JSON(fiber.Map{
-					"error": "username or password incorrect",
+					"error":   "username or password incorrect",
+					"message": "",
 				})
 			default:
 				return c.Status(http.StatusInternalServerError).JSON(fiber.Map{

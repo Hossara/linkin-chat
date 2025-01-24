@@ -46,6 +46,7 @@ func Bootstrap(ac app.App, cfg config.Server) error {
 	authGroup.Post("/register", handlers.Register(accountSvcGetter))
 
 	chatGroup.Get("/", authMiddleware, handlers.GetAllChats(chatSvcGetter))
+	chatGroup.Post("/:title", authMiddleware, handlers.CreateNewChat(chatSvcGetter))
 
 	//api.Post("/nats", NatsAuth(accountSvcGetter))
 
