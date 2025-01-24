@@ -11,7 +11,9 @@ import (
 	userDomain "github.com/Hossara/linkin-chat/internal/user/domain"
 )
 
-var ()
+var (
+	ErrInvalidUserID = user.ErrInvalidUserID
+)
 
 type service struct {
 	chatRepo    port.ChatRepo
@@ -32,7 +34,7 @@ func (s *service) GetChatRoomMessages(ctx context.Context, code chatDomain.ChatR
 
 func (s *service) GetUserChatRooms(ctx context.Context, userID userDomain.UserID) ([]*chatDomain.ChatRoom, error) {
 	if userID == 0 {
-		return nil, user.ErrInvalidUserID
+		return nil, ErrInvalidUserID
 	}
 
 	chatRooms, err := s.chatRepo.FindAllByUserID(ctx, userID)
