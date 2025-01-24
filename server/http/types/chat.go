@@ -9,3 +9,7 @@ type ResponseChatRoom struct {
 type AllChatsResponse struct {
 	Chats []ResponseChatRoom `json:"chats"`
 }
+
+type CreateNewChatResponse struct {
+	Code string `json:"code"`
+}
