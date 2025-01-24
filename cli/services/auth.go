@@ -16,7 +16,7 @@ func Login(username, password string) (string, error) {
 	server := viper.GetString("server")
 	a := api.NewApiHandler(server, 8080)
 
-	response, err := api.Post[types.LoginResponse](a, "/auth/login", loginBody, nil)
+	response, err := api.Post[types.LoginResponse](a, "/auth/login", loginBody, nil, nil)
 
 	if err != nil {
 		return "", err
@@ -36,7 +36,7 @@ func Register(username, password, firstName, lastName string) (string, error) {
 	server := viper.GetString("server")
 	a := api.NewApiHandler(server, 8080)
 
-	response, err := api.Post[types.LoginResponse](a, "/auth/register", registerBody, nil)
+	response, err := api.Post[types.LoginResponse](a, "/auth/register", registerBody, nil, nil)
 
 	if err != nil {
 		return "", err
