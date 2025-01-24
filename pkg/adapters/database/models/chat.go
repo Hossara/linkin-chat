@@ -8,6 +8,7 @@ type Chat struct {
 	gorm.Model
 	ID    uint   `gorm:"primaryKey;autoIncrement"`
 	Code  string `gorm:"unique;not null;size:100"`
+	Title string `gorm:"type:text;not null"`
 	Users []User `gorm:"many2many:chat_users;"`
 }
 

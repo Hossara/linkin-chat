@@ -19,6 +19,7 @@ func ToModelChat(d *domain.ChatRoom) *models.Chat {
 			DeletedAt: gorm.DeletedAt(ToNullTime(d.DeletedAt)),
 		},
 		ID:    uint(d.ID),
+		Title: d.Title,
 		Code:  string(d.Code),
 		Users: users,
 	}
@@ -31,6 +32,7 @@ func ToDomainChat(m *models.Chat) *domain.ChatRoom {
 
 	return &domain.ChatRoom{
 		ID:        domain.ChatRoomID(m.ID),
+		Title:     m.Title,
 		Code:      domain.ChatRoomCode(m.Code),
 		Users:     users,
 		CreatedAt: m.CreatedAt,

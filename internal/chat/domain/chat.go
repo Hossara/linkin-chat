@@ -23,6 +23,7 @@ type ChatRoomUser struct {
 type ChatRoom struct {
 	ID        ChatRoomID
 	Code      ChatRoomCode
+	Title     string
 	Users     []userDomain.User
 	CreatedAt time.Time
 	DeletedAt time.Time
