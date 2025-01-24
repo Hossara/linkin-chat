@@ -18,9 +18,12 @@ func ToModelChat(d *domain.ChatRoom) *models.Chat {
 			CreatedAt: d.CreatedAt,
 			DeletedAt: gorm.DeletedAt(ToNullTime(d.DeletedAt)),
 		},
-		ID:    uint(d.ID),
-		Code:  string(d.Code),
-		Users: users,
+		ID:      uint(d.ID),
+		Title:   d.Title,
+		Code:    string(d.Code),
+		Users:   users,
+		OwnerID: uint(d.OwnerID),
+		Owner:   *ToModelUser(&d.Owner),
 	}
 }
 
@@ -31,8 +34,11 @@ func ToDomainChat(m *models.Chat) *domain.ChatRoom {
 
 	return &domain.ChatRoom{
 		ID:        domain.ChatRoomID(m.ID),
+		Title:     m.Title,
 		Code:      domain.ChatRoomCode(m.Code),
 		Users:     users,
+		OwnerID:   userDomain.UserID(m.OwnerID),
+		Owner:     *ToDomainUser(&m.Owner),
 		CreatedAt: m.CreatedAt,
 	}
 }

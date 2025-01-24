@@ -40,12 +40,13 @@ func Bootstrap(ac app.App, cfg config.Server) error {
 	chatGroup := fiberApp.Group("/chat", reteLimiter)
 
 	accountSvcGetter := services.AccountServiceGetter(ac, cfg, privateKey)
-	chatSvcGetter := services.ChatServiceGetter(ac, cfg)
+	chatSvcGetter := services.ChatServiceGetter(ac)
 
 	authGroup.Post("/login", handlers.Login(accountSvcGetter))
 	authGroup.Post("/register", handlers.Register(accountSvcGetter))
 
 	chatGroup.Get("/", authMiddleware, handlers.GetAllChats(chatSvcGetter))
+	chatGroup.Post("/:title", authMiddleware, handlers.CreateNewChat(chatSvcGetter))
 
 	//api.Post("/nats", NatsAuth(accountSvcGetter))
 

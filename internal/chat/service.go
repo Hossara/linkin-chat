@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Hossara/linkin-chat/internal/user"
 
@@ -9,10 +10,13 @@ import (
 
 	chatDomain "github.com/Hossara/linkin-chat/internal/chat/domain"
 	userDomain "github.com/Hossara/linkin-chat/internal/user/domain"
+	chatRepo "github.com/Hossara/linkin-chat/pkg/adapters/database"
 )
 
 var (
-	ErrInvalidUserID = user.ErrInvalidUserID
+	ErrInvalidUserID      = user.ErrInvalidUserID
+	ErrMaximumChatReached = chatRepo.ErrMaximumChatReached
+	ErrInvalidChatInfo    = errors.New("chat room must have a valid code and title")
 )
 
 type service struct {
@@ -47,8 +51,33 @@ func (s *service) GetUserChatRooms(ctx context.Context, userID userDomain.UserID
 }
 
 func (s *service) CreateChatRoom(ctx context.Context, room chatDomain.ChatRoom) (chatDomain.ChatRoomCode, error) {
-	//TODO implement me
-	panic("implement me")
+	if room.OwnerID == 0 {
+		return "", fmt.Errorf("invalid user ID")
+	}
+
+	if room.Title == "" {
+		return "", ErrInvalidChatInfo
+	}
+
+	code, err := s.chatRepo.GenerateNewCode(ctx)
+
+	if err != nil {
+		return "", fmt.Errorf("failed to generate code: %w", err)
+	}
+
+	room.Code = code
+
+	err = s.chatRepo.Insert(ctx, room)
+
+	if err != nil {
+		if errors.Is(err, ErrMaximumChatReached) {
+			return "", ErrMaximumChatReached
+		}
+
+		return "", fmt.Errorf("failed to create chat room: %w", err)
+	}
+
+	return room.Code, nil
 }
 
 func (s *service) JoinChatRoom(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID) (chatDomain.ChatRoomCode, error) {

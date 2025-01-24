@@ -1,7 +1,15 @@
 package types
 
-import chatDomain "github.com/Hossara/linkin-chat/internal/chat/domain"
+type ResponseChatRoom struct {
+	ID    uint
+	Code  string
+	Title string
+}
 
 type AllChatsResponse struct {
-	Chats []*chatDomain.ChatRoom `json:"chats"`
+	Chats []ResponseChatRoom `json:"chats"`
+}
+
+type CreateNewChatResponse struct {
+	Code string `json:"code"`
 }

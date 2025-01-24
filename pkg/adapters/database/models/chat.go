@@ -6,9 +6,12 @@ import (
 
 type Chat struct {
 	gorm.Model
-	ID    uint   `gorm:"primaryKey;autoIncrement"`
-	Code  string `gorm:"unique;not null;size:100"`
-	Users []User `gorm:"many2many:chat_users;"`
+	ID      uint   `gorm:"primaryKey;autoIncrement"`
+	Code    string `gorm:"unique;not null;size:100"`
+	Title   string `gorm:"type:text;not null"`
+	Users   []User `gorm:"many2many:chat_users;"`
+	OwnerID uint   `gorm:"not null;index"`
+	Owner   User   `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type Message struct {
