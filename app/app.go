@@ -2,12 +2,14 @@ package app
 
 import (
 	"fmt"
+	"github.com/Hossara/linkin-chat/internal/chat"
 	"github.com/Hossara/linkin-chat/internal/user"
 	"github.com/Hossara/linkin-chat/pkg/adapters/database"
 	"github.com/Hossara/linkin-chat/pkg/cache"
 	"gorm.io/gorm"
 	"log"
 
+	chatPort "github.com/Hossara/linkin-chat/internal/chat/port"
 	userPort "github.com/Hossara/linkin-chat/internal/user/port"
 	redisAdapter "github.com/babyhando/order-service/pkg/adapters/cache"
 
@@ -22,6 +24,7 @@ type app struct {
 	redisProvider cache.Provider
 
 	userService userPort.Service
+	chatService chatPort.Service
 }
 
 func (a *app) DB() *gorm.DB {
@@ -66,6 +69,27 @@ func (a *app) UserService() userPort.Service {
 	}
 
 	return a.userService
+}
+
+func (a *app) ChatService() chatPort.Service {
+	if a.chatService == nil {
+		a.chatService = chat.NewService(
+			database.NewChatRepo(a.db),
+			database.NewMessageRepo(a.db),
+		)
+
+		if err := a.chatService.RunChatMigrations(); err != nil {
+			log.Fatalf("failed to run migrations for chats table in chat service: %v", err)
+		}
+
+		if err := a.chatService.RunMessageMigrations(); err != nil {
+			log.Fatalf("failed to run migrations for messages table in chat service: %v", err)
+		}
+
+		return a.chatService
+	}
+
+	return a.chatService
 }
 
 func (a *app) setRedis() {
