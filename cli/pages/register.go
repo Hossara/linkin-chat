@@ -2,13 +2,13 @@ package pages
 
 import (
 	"fmt"
+	"github.com/Hossara/linkin-chat/cli/components"
 	"github.com/Hossara/linkin-chat/cli/constants"
 	"github.com/Hossara/linkin-chat/cli/services"
-	"github.com/Hossara/linkin-chat/cli/tui"
 	"github.com/rivo/tview"
 )
 
-func RegisterPage(username, password, server string) {
+func RegisterPage(server string) {
 	app := tview.NewApplication()
 
 	textView := tview.NewTextView().
@@ -19,20 +19,20 @@ func RegisterPage(username, password, server string) {
 	var flex *tview.Flex
 
 	form = tview.NewForm().
-		AddInputField("Username", username, 20, tview.InputFieldMaxLength(74), nil).
-		AddInputField("Password", password, 20, tview.InputFieldMaxLength(74), nil).
-		AddInputField("First Name", username, 20, tview.InputFieldMaxLength(74), nil).
-		AddInputField("Last Name", password, 20, tview.InputFieldMaxLength(74), nil).
+		AddInputField("Username", "", 20, tview.InputFieldMaxLength(74), nil).
+		AddInputField("Password", "", 20, tview.InputFieldMaxLength(74), nil).
+		AddInputField("First Name", "", 20, tview.InputFieldMaxLength(74), nil).
+		AddInputField("Last Name", "", 20, tview.InputFieldMaxLength(74), nil).
 		AddButton("Register", func() {
 			usernameInput := form.GetFormItemByLabel("Username").(*tview.InputField)
 
-			username = usernameInput.GetText()
+			username := usernameInput.GetText()
 			password := form.GetFormItemByLabel("Password").(*tview.InputField).GetText()
 			firstName := form.GetFormItemByLabel("First Name").(*tview.InputField).GetText()
 			lastName := form.GetFormItemByLabel("Last Name").(*tview.InputField).GetText()
 
 			showModal := func(message string) {
-				app.SetRoot(tui.ErrorModal(message,
+				app.SetRoot(components.ErrorModal(message,
 					func(buttonIndex int, buttonLabel string) {
 						app.SetRoot(flex, true).SetFocus(usernameInput)
 					}),
@@ -62,7 +62,7 @@ func RegisterPage(username, password, server string) {
 				return
 			}
 
-			app.SetRoot(tui.ErrorModal(
+			app.SetRoot(components.ErrorModal(
 				fmt.Sprintf("User @%s registered successfuly! Now try login to system using join command. Use --help flag for more info.", username),
 				func(buttonIndex int, buttonLabel string) {
 					app.Stop()

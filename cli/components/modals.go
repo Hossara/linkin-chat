@@ -1,4 +1,4 @@
-package tui
+package components
 
 import "github.com/rivo/tview"
 
