@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func LoginPage(server string) {
+func LoginPage() {
 	app := tview.NewApplication()
 
 	textView := tview.NewTextView().
@@ -38,7 +38,7 @@ func LoginPage(server string) {
 			}
 
 			if len(username) > 4 && len(username) < 74 && len(password) > 4 && len(password) < 74 {
-				token, err := services.Login(username, password, server)
+				token, err := services.Login(username, password)
 
 				if err != nil {
 					showModal(err.Error())
