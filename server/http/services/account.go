@@ -2,9 +2,11 @@ package services
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"errors"
 	"github.com/Hossara/linkin-chat/internal/user/domain"
 	"github.com/Hossara/linkin-chat/server/http/mapper"
+	"log"
 	"time"
 
 	"github.com/Hossara/linkin-chat/app"
@@ -25,14 +27,14 @@ var (
 )
 
 type AccountService struct {
-	svc                              userPort.Service
-	authSecret                       string
-	expMin, refreshExpMin, otpTtlMin uint
+	svc               userPort.Service
+	authSecret        *ecdsa.PrivateKey
+	expMin, otpTtlMin uint
 }
 
 func NewAccountService(
 	svc userPort.Service,
-	authSecret string,
+	authSecret *ecdsa.PrivateKey,
 	expMin uint,
 ) *AccountService {
 	return &AccountService{
@@ -42,22 +44,23 @@ func NewAccountService(
 	}
 }
 
-func AccountServiceGetter(appContainer app.App, cfg config.Server) helpers.ServiceGetter[*AccountService] {
+func AccountServiceGetter(appContainer app.App, cfg config.Server, secret *ecdsa.PrivateKey) helpers.ServiceGetter[*AccountService] {
 	return func(ctx context.Context) *AccountService {
 		return NewAccountService(
 			appContainer.UserService(),
-			cfg.Secret,
+			secret,
 			cfg.AuthExpirationMinutes,
 		)
 	}
 }
 
 func (as *AccountService) generateToken(user *domain.User) (string, error) {
-	var authExp = time.Now().Add(time.Minute * time.Duration(as.expMin))
+	var authExp = time.Now().Add(time.Duration(as.expMin) * time.Minute)
 
-	accessToken, err := jwt2.CreateToken([]byte(as.authSecret), jwt2.GenerateUserClaims(user, authExp))
+	accessToken, err := jwt2.CreateToken(as.authSecret, jwt2.GenerateUserClaims(user, authExp))
 
 	if err != nil {
+		log.Printf("%s: %s", ErrCreatingToken, err)
 		return "", ErrCreatingToken
 	}
 
