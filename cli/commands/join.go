@@ -1,31 +1,55 @@
 package commands
 
 import (
+	"github.com/Hossara/linkin-chat/cli/pages"
+	"github.com/Hossara/linkin-chat/cli/services"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
-
-	"github.com/Hossara/linkin-chat/cli/pages"
 )
 
 var joinCmd = &cobra.Command{
 	Use:   "join",
 	Short: "Join the chatroom",
 	Run: func(cmd *cobra.Command, args []string) {
-		username, _ := cmd.Flags().GetString("username")
-		password, _ := cmd.Flags().GetString("password")
 		server, _ := cmd.Flags().GetString("server")
 
-		pages.LoginPage(username, password, server)
+		username := viper.GetString("login.username")
+		password := viper.GetString("login.password")
 
-		log.Println(viper.GetString("login.token"))
+		if username == "" || password == "" {
+			pages.LoginPage(server)
+		} else {
+			token, err := services.Login(username, password, server)
+
+			viper.Set("login.token", token)
+
+			if err != nil {
+				viper.Set("login", nil)
+				err := viper.WriteConfig()
+
+				if err != nil {
+					log.Fatalf("Error while writing config: %v", err)
+					return
+				}
+
+				pages.LoginPage(server)
+			}
+		}
+
+		token := viper.GetString("login.token")
+
+		if token == "" {
+			log.Fatalf("Token is empty! Something wrong with configuration file!")
+		}
+
+		pages.HomePage(server, token)
+
 	},
 }
 
 func SetJoinCommand(cmd *cobra.Command) {
 	cmd.AddCommand(joinCmd)
 
-	joinCmd.Flags().StringP("username", "u", "", "Account username")
-	joinCmd.Flags().StringP("password", "p", "", "Account password")
 	joinCmd.Flags().StringP("server", "s", "localhost", "Server address")
 }

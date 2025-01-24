@@ -1,14 +1,15 @@
 package pages
 
 import (
+	"fmt"
+	"github.com/Hossara/linkin-chat/cli/components"
 	"github.com/Hossara/linkin-chat/cli/constants"
 	"github.com/Hossara/linkin-chat/cli/services"
-	"github.com/Hossara/linkin-chat/cli/tui"
 	"github.com/rivo/tview"
 	"github.com/spf13/viper"
 )
 
-func LoginPage(username, password, server string) {
+func LoginPage(server string) {
 	app := tview.NewApplication()
 
 	textView := tview.NewTextView().
@@ -19,8 +20,8 @@ func LoginPage(username, password, server string) {
 	var flex *tview.Flex
 
 	form = tview.NewForm().
-		AddInputField("Username", username, 20, tview.InputFieldMaxLength(74), nil).
-		AddInputField("Password", password, 20, tview.InputFieldMaxLength(74), nil).
+		AddInputField("Username", "", 20, tview.InputFieldMaxLength(74), nil).
+		AddInputField("Password", "", 20, tview.InputFieldMaxLength(74), nil).
 		AddButton("Login", func() {
 			usernameInput := form.GetFormItemByLabel("Username").(*tview.InputField)
 			username := usernameInput.GetText()
@@ -28,7 +29,7 @@ func LoginPage(username, password, server string) {
 			password := form.GetFormItemByLabel("Password").(*tview.InputField).GetText()
 
 			showModal := func(message string) {
-				app.SetRoot(tui.ErrorModal(message,
+				app.SetRoot(components.ErrorModal(message,
 					func(buttonIndex int, buttonLabel string) {
 						app.SetRoot(flex, true).SetFocus(usernameInput)
 					}),
@@ -41,6 +42,15 @@ func LoginPage(username, password, server string) {
 
 				if err != nil {
 					showModal(err.Error())
+					return
+				}
+
+				viper.Set("login.username", username)
+				viper.Set("login.password", password)
+				err = viper.WriteConfig()
+
+				if err != nil {
+					showModal(fmt.Sprintf("Cannot save files to configuration file! Please restart the app. Error: %v", err))
 					return
 				}
 
