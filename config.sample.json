@@ -2,8 +2,7 @@
   "server": {
     "port": "8080",
     "password_secret": "your_password_secret_key",
-    "secret": "your_jwt_secret_key",
-    "auth_expiration_minutes": 1440
+    "auth_expiration_minutes": 60
   },
   "nats": {
     "host": "localhost",

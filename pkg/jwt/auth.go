@@ -1,17 +1,18 @@
 package jwt
 
 import (
-	"errors"
+	"crypto/ecdsa"
+	"github.com/gofiber/fiber/v2"
 	jwt2 "github.com/golang-jwt/jwt/v5"
 	"time"
 
 	"github.com/Hossara/linkin-chat/internal/user/domain"
 )
 
-const UserClaimKey = "User-Claims"
+const UserClaimKey = "user"
 
-func CreateToken(secret []byte, claims *UserClaims) (string, error) {
-	return jwt2.NewWithClaims(jwt2.SigningMethodHS512, claims).SignedString(secret)
+func CreateToken(secret *ecdsa.PrivateKey, claims *UserClaims) (string, error) {
+	return jwt2.NewWithClaims(jwt2.SigningMethodES256, claims).SignedString(secret)
 }
 
 func GenerateUserClaims(user *domain.User, exp time.Time) *UserClaims {
@@ -26,30 +27,13 @@ func GenerateUserClaims(user *domain.User, exp time.Time) *UserClaims {
 	}
 }
 
-func ParseToken(tokenString string, secret []byte) (*UserClaims, error) {
-	token, err := jwt2.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt2.Token) (interface{}, error) {
-		return secret, nil
-	})
+func GetUserClaims(ctx *fiber.Ctx) *UserClaims {
+	if u := ctx.Locals(UserClaimKey); u != nil {
+		userClaims, ok := u.(*jwt2.Token).Claims.(*UserClaims)
 
-	if token == nil {
-		return nil, errors.New("invalid token (nil)")
-	}
-
-	var claim *UserClaims
-	if token.Claims != nil {
-		cc, ok := token.Claims.(*UserClaims)
 		if ok {
-			claim = cc
+			return userClaims
 		}
 	}
-
-	if err != nil {
-		return claim, err
-	}
-
-	if !token.Valid {
-		return claim, errors.New("token is not valid")
-	}
-
-	return claim, nil
+	return nil
 }
