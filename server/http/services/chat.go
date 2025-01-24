@@ -6,6 +6,7 @@ import (
 	chatPort "github.com/Hossara/linkin-chat/internal/chat/port"
 	userDomain "github.com/Hossara/linkin-chat/internal/user/domain"
 	"github.com/Hossara/linkin-chat/server/http/helpers"
+	"github.com/Hossara/linkin-chat/server/http/mapper"
 	"github.com/Hossara/linkin-chat/server/http/types"
 )
 
@@ -36,7 +37,5 @@ func (as *ChatService) GetAllChats(c context.Context, userID uint) (*types.AllCh
 		return nil, err
 	}
 
-	return &types.AllChatsResponse{
-		Chats: rooms,
-	}, nil
+	return mapper.ToResponseChatRoom(rooms), nil
 }
