@@ -12,8 +12,6 @@ var joinCmd = &cobra.Command{
 	Use:   "join",
 	Short: "Join the chatroom",
 	Run: func(cmd *cobra.Command, args []string) {
-		username, _ := cmd.Flags().GetString("username")
-		password, _ := cmd.Flags().GetString("password")
 		server, _ := cmd.Flags().GetString("server")
 
 		pages.LoginPage(username, password, server)
@@ -25,7 +23,5 @@ var joinCmd = &cobra.Command{
 func SetJoinCommand(cmd *cobra.Command) {
 	cmd.AddCommand(joinCmd)
 
-	joinCmd.Flags().StringP("username", "u", "", "Account username")
-	joinCmd.Flags().StringP("password", "p", "", "Account password")
 	joinCmd.Flags().StringP("server", "s", "localhost", "Server address")
 }
