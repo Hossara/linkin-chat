@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
 
@@ -23,8 +22,6 @@ func Login(svcGetter helpers.ServiceGetter[*services.AccountService]) fiber.Hand
 		response, err := svc.Login(c.UserContext(), *body)
 
 		if err != nil {
-			fmt.Printf("Error while logging in %v\n", err)
-
 			switch {
 			case errors.Is(err, services.ErrUserNotFound):
 				return c.Status(http.StatusNotFound).JSON(fiber.Map{
