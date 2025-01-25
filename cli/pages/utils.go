@@ -30,16 +30,19 @@ type CaptureType func(event *tcell.EventKey) *tcell.EventKey
 func CaptureFocus(app *tview.Application, currentFocus int, focusList []tview.Primitive) CaptureType {
 	return func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
-		case tcell.KeyTab: // Move to the next focusable item
+		case tcell.KeyTab:
 			currentFocus = (currentFocus + 1) % len(focusList)
 			app.SetFocus(focusList[currentFocus])
 			return nil
-		case tcell.KeyBacktab: // Move to the previous focusable item
+		case tcell.KeyBacktab:
 			currentFocus = (currentFocus - 1 + len(focusList)) % len(focusList)
 			app.SetFocus(focusList[currentFocus])
 			return nil
+		case tcell.KeyEsc:
+			app.SetFocus(nil)
 		default:
+			return event
 		}
-		return event
+		return nil
 	}
 }
