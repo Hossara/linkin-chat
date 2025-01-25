@@ -1,0 +1,20 @@
+services:
+  linkin-chat-redis:
+    image: redis/redis-stack:latest
+    container_name: linkin-chat-redis
+    networks:
+      - linkin-chat-network
+    volumes:
+      - linkin-chat-redis-volume:/data
+    depends_on:
+      - linkin-chat-nats
+      - linkin-chat-db
+
+volumes:
+  linkin-chat-redis-volume:
+    driver: local
+
+networks:
+  linkin-chat-network:
+    name: linkin-chat-network
+    external: true

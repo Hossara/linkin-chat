@@ -1,0 +1,19 @@
+services:
+  linkin-chat-server:
+    container_name: linkin-chat-server
+    networks:
+      - linkin-chat-network
+    build:
+      context: ../
+      dockerfile: build/server/Dockerfile
+    volumes:
+      - "../config.json:/usr/local/bin/config.json"
+    depends_on:
+      - linkin-chat-nats
+      - linkin-chat-db
+      - linkin-chat-redis
+
+networks:
+  linkin-chat-network:
+    name: linkin-chat-network
+    external: true
