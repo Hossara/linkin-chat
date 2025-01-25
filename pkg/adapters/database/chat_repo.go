@@ -17,7 +17,10 @@ import (
 )
 
 var (
-	ErrMaximumChatReached = errors.New("maximum chat reached")
+	ErrMaximumChatReached      = errors.New("maximum chat reached")
+	ErrUserAlreadyExistsInChat = errors.New("user already exists in chat")
+	ErrUserNotExistsInChat     = errors.New("user not exists in chat")
+	ErrChatNotFound            = errors.New("chat not found")
 )
 
 const (
@@ -105,8 +108,24 @@ func (r *chatRepo) Count(ctx context.Context, userID domain.UserID) (int, error)
 }
 
 func (r *chatRepo) Delete(ctx context.Context, code chatDomain.ChatRoomCode) error {
-	//TODO implement me
-	panic("implement me")
+	var chat models.Chat
+
+	// Fetch the chat by its code to ensure it exists
+	err := r.db.WithContext(ctx).Where("code = ?", code).First(&chat).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrChatNotFound
+		}
+		return fmt.Errorf("failed to fetch chat: %w", err)
+	}
+
+	// Delete the chat
+	err = r.db.WithContext(ctx).Delete(&chat).Error
+	if err != nil {
+		return fmt.Errorf("failed to delete chat: %w", err)
+	}
+
+	return nil
 }
 
 func (r *chatRepo) FindAllByUserID(ctx context.Context, userID domain.UserID) ([]*chatDomain.ChatRoom, error) {
@@ -129,14 +148,74 @@ func (r *chatRepo) FindAllByUserID(ctx context.Context, userID domain.UserID) ([
 	return chatRooms, nil
 }
 
-func (r *chatRepo) InsertUserToChat(ctx context.Context, code chatDomain.ChatRoomCode, userID domain.UserID) {
-	//TODO implement me
-	panic("implement me")
+func (r *chatRepo) InsertUserToChat(ctx context.Context, code chatDomain.ChatRoomCode, userID domain.UserID) error {
+	var chat models.Chat
+
+	// Fetch the chat by its code
+	err := r.db.WithContext(ctx).Where("code = ?", code).First(&chat).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrChatNotFound
+		}
+		return fmt.Errorf("failed to fetch chat: %w", err)
+	}
+
+	var exists bool
+	err = r.db.WithContext(ctx).
+		Model(&chat).
+		Select("COUNT(*) > 0").
+		Where("user_id = ?", userID).
+		Association("Users").
+		Find(&exists)
+
+	if err != nil {
+		return fmt.Errorf("failed to check if user exists in chat: %w", err)
+	}
+	if exists {
+		return ErrUserAlreadyExistsInChat
+	}
+
+	// Add the user to the chat
+	err = r.db.WithContext(ctx).Model(&chat).Association("Users").Append(&models.User{ID: uint(userID)})
+	if err != nil {
+		return fmt.Errorf("failed to add user to chat: %w", err)
+	}
+
+	return nil
 }
 
-func (r *chatRepo) DeleteUserFromChat(ctx context.Context, code chatDomain.ChatRoomCode, userID domain.UserID) {
-	//TODO implement me
-	panic("implement me")
+func (r *chatRepo) DeleteUserFromChat(ctx context.Context, code chatDomain.ChatRoomCode, userID domain.UserID) error {
+	var chat models.Chat
+
+	err := r.db.WithContext(ctx).Where("code = ?", code).First(&chat).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrChatNotFound
+		}
+		return fmt.Errorf("failed to fetch chat: %w", err)
+	}
+
+	// Check if the user is part of the chat
+	var count int64
+	err = r.db.WithContext(ctx).
+		Table("chat_users").
+		Where("chat_id = ? AND user_id = ?", chat.ID, userID).
+		Count(&count).Error
+
+	if err != nil {
+		return fmt.Errorf("failed to check if user exists in chat: %w", err)
+	}
+	if count == 0 {
+		return ErrUserNotExistsInChat
+	}
+
+	// Remove the user from the chat
+	err = r.db.WithContext(ctx).Model(&chat).Association("Users").Delete(&models.User{ID: uint(userID)})
+	if err != nil {
+		return fmt.Errorf("failed to remove user from chat: %w", err)
+	}
+
+	return nil
 }
 
 func (r *chatRepo) RunMigrations() error {
