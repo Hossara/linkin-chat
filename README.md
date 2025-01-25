@@ -35,6 +35,7 @@ Linkin Chat is a TUI (Text User Interface) based chat application that uses HTTP
   * [Known Issues](#known-issues)
   * [Planned Improvements](#planned-improvements)
   * [UML](#uml)
+  * [Test video](#test-video)
 <!-- TOC -->
 
 ## Tech Stack
@@ -249,3 +250,6 @@ Once the foundational features are stable, the following improvements and featur
 
 ## UML
 ![UML](./uml.png)
+
+## Test video
+![Vid](./tutorial.gif)
