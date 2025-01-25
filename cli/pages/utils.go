@@ -38,11 +38,9 @@ func CaptureFocus(app *tview.Application, currentFocus int, focusList []tview.Pr
 			currentFocus = (currentFocus - 1 + len(focusList)) % len(focusList)
 			app.SetFocus(focusList[currentFocus])
 			return nil
-		case tcell.KeyEsc:
-			app.SetFocus(nil)
 		default:
-			return event
 		}
-		return nil
+
+		return event
 	}
 }

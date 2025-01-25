@@ -113,7 +113,8 @@ func (r *chatRepo) FindAllByUserID(ctx context.Context, userID domain.UserID) ([
 	var chats []models.Chat
 
 	err := r.db.WithContext(ctx).
-		Where("owner_id = ?", userID).
+		Joins("LEFT JOIN chat_users ON chat_users.chat_id = chats.id").
+		Where("chats.owner_id = ? OR chat_users.user_id = ?", userID, userID).
 		Preload("Users").
 		Preload("Owner").
 		Find(&chats).Error
