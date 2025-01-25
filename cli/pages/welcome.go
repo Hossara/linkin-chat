@@ -11,19 +11,22 @@ import (
 	"log"
 )
 
-func confirmJoinAction(app *tview.Application) func(root *tview.Flex, name string, code string) {
-	return func(root *tview.Flex, name string, code string) {
+func confirmJoinAction(app *tview.Application, pages *tview.Pages) func(name string, code string) {
+	return func(name string, code string) {
 		modal := tview.NewModal().
 			SetText(fmt.Sprintf("What would you like to do with [black]%s?", name)).
 			AddButtons([]string{"Join", "Remove", "Cancel"}).
 			SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 				switch buttonLabel {
 				case "Join":
-					fmt.Println("Joining", name)
+					viper.Set("chat.code", code)
+					app.SetRoot(pages, true)
+					RemoveAndNavigate(pages, app, "chat")
 				case "Remove":
 					fmt.Println("Removing", name)
+				default:
+					app.SetRoot(pages, true)
 				}
-				app.SetRoot(root, true) // Return to the list
 			})
 
 		app.SetRoot(modal, true)
@@ -85,7 +88,7 @@ func WelcomePage(app *tview.Application, pages *tview.Pages) tview.Primitive {
 			1, 0, false).
 		AddItem(nil, 1, 0, false)
 
-	confirmActionModal := confirmJoinAction(app)
+	confirmActionModal := confirmJoinAction(app, pages)
 
 	// Chatrooms list
 	chatroomsList := tview.NewList()
@@ -102,7 +105,7 @@ func WelcomePage(app *tview.Application, pages *tview.Pages) tview.Primitive {
 
 	for _, room := range chatList {
 		chatroomsList.AddItem(room.Title, "[Join] [Remove]", 0, func() {
-			confirmActionModal(root, room.Title, room.Code)
+			confirmActionModal(room.Title, room.Code)
 		})
 	}
 
@@ -116,9 +119,9 @@ func WelcomePage(app *tview.Application, pages *tview.Pages) tview.Primitive {
 	})
 
 	joinButton := tview.NewButton("Join Another Chatroom").SetSelectedFunc(func() {
-		// Action for joining another chatroom
-		fmt.Println("Join another chatroom clicked")
+		RemoveAndNavigate(pages, app, "join_chat")
 	})
+
 	chatroomButtons := tview.NewFlex().SetDirection(tview.FlexRowCSS).
 		AddItem(createButton, 0, 1, false).
 		AddItem(nil, 1, 0, false).
