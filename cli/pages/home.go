@@ -29,7 +29,9 @@ func HomePage() {
 	pages := tview.NewPages()
 
 	for name, page := range GetPages() {
-		pages.AddPage(name, page(app, pages), true, name == "welcome")
+		if name != "chat" {
+			pages.AddPage(name, page(app, pages), true, name == "welcome")
+		}
 	}
 
 	// Signal channel to handle OS interrupts
