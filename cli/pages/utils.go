@@ -20,8 +20,9 @@ func NavigateTo(pages *tview.Pages, pageName string) {
 func RemoveAndNavigate(pages *tview.Pages, app *tview.Application, name string) {
 	if pages.HasPage(name) {
 		pages.RemovePage(name)
-		pages.AddAndSwitchToPage(name, GetPage(name)(app, pages), true)
 	}
+
+	pages.AddAndSwitchToPage(name, GetPage(name)(app, pages), true)
 }
 
 type CaptureType func(event *tcell.EventKey) *tcell.EventKey
