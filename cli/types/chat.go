@@ -1,5 +1,9 @@
 package types
 
+import (
+	"time"
+)
+
 type ResponseChatRoom struct {
 	ID    uint   `json:"id"`
 	Code  string `json:"code"`
@@ -12,4 +16,15 @@ type AllChatsResponse struct {
 
 type CreateNewChatResponse struct {
 	Code string `json:"code"`
+}
+
+type ChatRoomUser struct {
+	Username string
+	Role     uint
+}
+
+type Message struct {
+	Sender    ChatRoomUser
+	Content   string
+	CreatedAt time.Time
 }
