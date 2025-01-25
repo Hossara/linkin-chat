@@ -28,6 +28,8 @@ type RedisConfig struct {
 	Port uint   `mapstructure:"port"`
 }
 type Nats struct {
-	Host string `mapstructure:"host"`
-	Port uint   `mapstructure:"port"`
+	Host     string `mapstructure:"host"`
+	Port     uint   `mapstructure:"port"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
