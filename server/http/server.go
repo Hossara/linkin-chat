@@ -48,7 +48,7 @@ func Bootstrap(ac app.App, cfg config.Server) error {
 	chatGroup.Get("/", authMiddleware, handlers.GetAllChats(chatSvcGetter))
 	chatGroup.Post("/:title", authMiddleware, handlers.CreateNewChat(chatSvcGetter))
 
-	//api.Post("/nats", NatsAuth(accountSvcGetter))
+	fiberApp.Post("/nats", handlers.HandleNatsAuth(accountSvcGetter, chatSvcGetter))
 
 	return fiberApp.Listen(fmt.Sprintf(":%d", cfg.Port))
 }
