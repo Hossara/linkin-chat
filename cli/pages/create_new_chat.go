@@ -44,6 +44,8 @@ func CreateNewChatPage(app *tview.Application, pages *tview.Pages) tview.Primiti
 				func(buttonIndex int, buttonLabel string) {
 					app.SetRoot(form, true)
 				}), true)
+
+			form.SetFocus(0)
 			return
 		}
 		// Show loading text and trigger function
@@ -57,6 +59,7 @@ func CreateNewChatPage(app *tview.Application, pages *tview.Pages) tview.Primiti
 					app.SetRoot(pages, true)
 					NavigateTo(pages, "welcome")
 				}), true)
+			form.SetFocus(0)
 			return
 		}
 
