@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Hossara/linkin-chat/cli/types"
+	"github.com/Hossara/linkin-chat/pkg/utils"
+	"github.com/spf13/viper"
 	"io"
 	"net/http"
 	"strings"
@@ -12,10 +14,17 @@ import (
 
 type RequestBody map[string]interface{}
 type RequestQuery map[string]string
+type Headers map[string]string
 
 type Api struct {
 	BaseUrl string
 	Port    uint
+}
+
+func GetAuthHeaders() *Headers {
+	return &Headers{
+		"Authorization": fmt.Sprintf("Bearer %s", viper.GetString("login.token")),
+	}
 }
 
 func NewApiHandler(baseUrl string, port uint) *Api {
@@ -40,7 +49,7 @@ func (a *Api) buildURL(endpoint string, query *RequestQuery) string {
 	return url
 }
 
-func Post[T any](a *Api, endpoint string, body *RequestBody, query *RequestQuery) (*T, error) {
+func Post[T any](a *Api, endpoint string, body *RequestBody, query *RequestQuery, headers *Headers) (*T, error) {
 	// Build URL with query parameters
 	url := a.buildURL(endpoint, query)
 
@@ -57,14 +66,28 @@ func Post[T any](a *Api, endpoint string, body *RequestBody, query *RequestQuery
 		jsonBody = []byte("{}")
 	}
 
-	reqBody := bytes.NewBuffer(jsonBody)
-
 	// Create a new POST request
-	res, err := http.Post(url, "application/json", reqBody)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonBody))
 
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
+
+	if headers != nil {
+		for key, value := range *headers {
+			req.Header.Set(key, value)
+		}
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	// Execute the request
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	defer res.Body.Close()
 
 	// Read the response body
 	respBody, err := io.ReadAll(res.Body)
@@ -74,12 +97,20 @@ func Post[T any](a *Api, endpoint string, body *RequestBody, query *RequestQuery
 
 	// Handle the response status code
 	if res.StatusCode != http.StatusOK {
+		if res.StatusCode == http.StatusUnauthorized {
+			return nil, fmt.Errorf("your login has expired")
+		}
+
 		var errRes *types.ErrorResponse
 		if err := json.Unmarshal(respBody, &errRes); err != nil {
 			return nil, fmt.Errorf("received non-OK status code: %d\nResponse Body: %s", res.StatusCode, respBody)
 		}
 
-		return nil, fmt.Errorf(errRes.Error)
+		return nil, fmt.Errorf(
+			errRes.Error + utils.IfThenElse(errRes.Message == "", "",
+				fmt.Sprintf(" %s", errRes.Message),
+			).(string),
+		)
 	}
 
 	var result *T
@@ -90,33 +121,51 @@ func Post[T any](a *Api, endpoint string, body *RequestBody, query *RequestQuery
 	return result, nil
 }
 
-func Get[T any](a *Api, endpoint string, query *RequestQuery) (*T, error) {
+func Get[T any](a *Api, endpoint string, query *RequestQuery, headers *Headers) (*T, error) {
 	// Build URL with query parameters
 	url := a.buildURL(endpoint, query)
 
 	// Create a new GET request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 
-	// Send the request
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("error sending request: %w", err)
+	if headers != nil {
+		for key, value := range *headers {
+			req.Header.Set(key, value)
+		}
 	}
-	defer resp.Body.Close()
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error executing request: %w", err)
+	}
+	defer res.Body.Close()
 
 	// Read the response body
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
 	// Handle the response status code
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("received non-OK status code: %d\nResponse Body: %s", resp.StatusCode, respBody)
+	if res.StatusCode != http.StatusOK {
+		if res.StatusCode == http.StatusUnauthorized {
+			return nil, fmt.Errorf("your login has expired")
+		}
+
+		var errRes *types.ErrorResponse
+		if err := json.Unmarshal(respBody, &errRes); err != nil {
+			return nil, fmt.Errorf("received non-OK status code: %d\nResponse Body: %s", res.StatusCode, respBody)
+		}
+
+		return nil, fmt.Errorf(
+			errRes.Error + utils.IfThenElse(errRes.Message == "", "",
+				fmt.Sprintf(" %s", errRes.Message),
+			).(string),
+		)
 	}
 
 	var result *T

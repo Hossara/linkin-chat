@@ -1,32 +1,49 @@
-package components
+package pages
 
 import (
 	"fmt"
-	"github.com/gdamore/tcell/v2"
+	"github.com/Hossara/linkin-chat/cli/components"
+	"github.com/Hossara/linkin-chat/cli/services"
+	"github.com/Hossara/linkin-chat/cli/types"
+	"github.com/Hossara/linkin-chat/pkg/utils"
 	"github.com/rivo/tview"
 	"github.com/spf13/viper"
+	"log"
 )
 
-func confirmAction(app *tview.Application) func(root *tview.Flex, chatroomName string) {
-	return func(root *tview.Flex, chatroomName string) {
+func confirmJoinAction(app *tview.Application, pages *tview.Pages) func(name string, code string) {
+	return func(name string, code string) {
 		modal := tview.NewModal().
-			SetText(fmt.Sprintf("What would you like to do with %s?", chatroomName)).
+			SetText(fmt.Sprintf("What would you like to do with [black]%s?", name)).
 			AddButtons([]string{"Join", "Remove", "Cancel"}).
 			SetDoneFunc(func(buttonIndex int, buttonLabel string) {
 				switch buttonLabel {
 				case "Join":
-					fmt.Println("Joining", chatroomName)
+					viper.Set("chat.code", code)
+					app.SetRoot(pages, true)
+					RemoveAndNavigate(pages, app, "chat")
 				case "Remove":
-					fmt.Println("Removing", chatroomName)
+					fmt.Println("Removing", name)
+				default:
+					app.SetRoot(pages, true)
 				}
-				app.SetRoot(root, true) // Return to the list
 			})
 
 		app.SetRoot(modal, true)
 	}
 }
 
-func WelcomePage(app *tview.Application) *tview.Flex {
+func getChats() ([]types.ResponseChatRoom, error) {
+	chats, err := services.GetAllChats()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return chats, nil
+}
+
+func WelcomePage(app *tview.Application, pages *tview.Pages) tview.Primitive {
 	username := viper.GetString("login.username")
 	var root *tview.Flex
 
@@ -40,11 +57,15 @@ func WelcomePage(app *tview.Application) *tview.Flex {
 		SetDynamicColors(true)
 
 	logoutBtn := tview.NewButton("Logout").SetSelectedFunc(func() {
-		viper.Reset()
+		viper.Set("login.username", "")
+		viper.Set("login.password", "")
 		err := viper.WriteConfig()
 
 		if err != nil {
-			ErrorModal("Error writing config file", nil)
+			app.SetRoot(components.ErrorModal("Error writing config file",
+				func(buttonIndex int, buttonLabel string) {
+					app.SetRoot(root, true)
+				}), true)
 			return
 		}
 		app.Stop()
@@ -67,59 +88,44 @@ func WelcomePage(app *tview.Application) *tview.Flex {
 			1, 0, false).
 		AddItem(nil, 1, 0, false)
 
-	confirmActionModal := confirmAction(app)
+	confirmActionModal := confirmJoinAction(app, pages)
 
 	// Chatrooms list
-	chatroomsList := tview.NewList().
-		AddItem("Chatroom 1", "[Join] [Remove]", 0, func() {
-			fmt.Println("Joining Chatroom 1")
-		}).
-		AddItem("Chatroom 2", "[Join] [Remove]", 0, func() {
-			fmt.Println("Joining Chatroom 1")
-		}).
-		AddItem("Chatroom 3", "[Join] [Remove]", 0, func() {
-			confirmActionModal(root, "Chatroom 3")
+	chatroomsList := tview.NewList()
+	var chatList []types.ResponseChatRoom
+
+	var err error
+	chatList, err = getChats()
+
+	if err != nil {
+		viper.Set("login.username", "")
+		viper.Set("login.password", "")
+		log.Fatal(err)
+	}
+
+	for _, room := range chatList {
+		chatroomsList.AddItem(room.Title, "[Join] [Remove]", 0, func() {
+			confirmActionModal(room.Title, room.Code)
 		})
-	chatroomsList.SetBorder(true).SetTitle("  Your Chatrooms  ")
+	}
+
+	chatroomsList.SetBorder(true).SetTitle(
+		utils.IfThenElse(len(chatList) == 0, "  You have not chat!  ", "  Your Chatrooms  ").(string),
+	)
 
 	// Buttons to create and join chatrooms
 	createButton := tview.NewButton("Create New Chatroom").SetSelectedFunc(func() {
-		// Action for creating a new chatroom
-		fmt.Println("Create new chatroom clicked")
+		RemoveAndNavigate(pages, app, "create_new_chat")
 	})
+
 	joinButton := tview.NewButton("Join Another Chatroom").SetSelectedFunc(func() {
-		// Action for joining another chatroom
-		fmt.Println("Join another chatroom clicked")
+		RemoveAndNavigate(pages, app, "join_chat")
 	})
+
 	chatroomButtons := tview.NewFlex().SetDirection(tview.FlexRowCSS).
 		AddItem(createButton, 0, 1, false).
 		AddItem(nil, 1, 0, false).
 		AddItem(joinButton, 0, 1, false)
-
-	focusList := []tview.Primitive{
-		closeBtn,
-		logoutBtn,
-		chatroomsList,
-		createButton,
-		joinButton,
-	}
-
-	// Manage focus index
-	currentFocus := 2
-	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyTab: // Move to the next focusable item
-			currentFocus = (currentFocus + 1) % len(focusList)
-			app.SetFocus(focusList[currentFocus])
-			return nil
-		case tcell.KeyBacktab: // Move to the previous focusable item
-			currentFocus = (currentFocus - 1 + len(focusList)) % len(focusList)
-			app.SetFocus(focusList[currentFocus])
-			return nil
-		default:
-		}
-		return event
-	})
 
 	// Layout
 	root = tview.NewFlex().SetDirection(tview.FlexRow).
@@ -128,6 +134,14 @@ func WelcomePage(app *tview.Application) *tview.Flex {
 		AddItem(logoutFlex, 2, 0, false).
 		AddItem(chatroomsList, 0, 1, true).
 		AddItem(chatroomButtons, 3, 0, false)
+
+	root.SetInputCapture(CaptureFocus(app, 2, []tview.Primitive{
+		closeBtn,
+		logoutBtn,
+		chatroomsList,
+		createButton,
+		joinButton,
+	}))
 
 	return root
 }

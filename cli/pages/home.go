@@ -1,18 +1,38 @@
 package pages
 
 import (
-	"github.com/Hossara/linkin-chat/cli/components"
 	"github.com/rivo/tview"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-func HomePage(server, token string) {
+type Page func(app *tview.Application, pages *tview.Pages) tview.Primitive
+
+var pages = make(map[string]Page)
+
+func GetPages() map[string]Page {
+	pages["welcome"] = WelcomePage
+	pages["create_new_chat"] = CreateNewChatPage
+	pages["join_chat"] = JoinChatPage
+	pages["chat"] = ChatPage
+
+	return pages
+}
+
+func GetPage(title string) Page {
+	return GetPages()[title]
+}
+
+func HomePage() {
 	app := tview.NewApplication()
 	pages := tview.NewPages()
 
-	pages.AddPage("welcome", components.WelcomePage(app), true, true)
+	for name, page := range GetPages() {
+		if name != "chat" {
+			pages.AddPage(name, page(app, pages), true, name == "welcome")
+		}
+	}
 
 	// Signal channel to handle OS interrupts
 	signalChan := make(chan os.Signal, 1)
@@ -20,16 +40,8 @@ func HomePage(server, token string) {
 
 	go func() {
 		<-signalChan
-		app.Stop()
+		os.Exit(0)
 	}()
 
 	RenderPage(app, pages)
-}
-
-func NavigateTo(pages *tview.Pages, pageName string, page tview.Primitive) {
-	if pages.HasPage(pageName) {
-		pages.SwitchToPage(pageName)
-	} else {
-		pages.AddPage(pageName, page, true, true)
-	}
 }

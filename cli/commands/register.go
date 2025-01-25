@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/Hossara/linkin-chat/cli/pages"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var registerCmd = &cobra.Command{
@@ -11,7 +12,9 @@ var registerCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		server, _ := cmd.Flags().GetString("server")
 
-		pages.RegisterPage(server)
+		viper.Set("server", server)
+
+		pages.RegisterPage()
 	},
 }
 

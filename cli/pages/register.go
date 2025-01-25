@@ -8,7 +8,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func RegisterPage(server string) {
+func RegisterPage() {
 	app := tview.NewApplication()
 
 	textView := tview.NewTextView().
@@ -50,7 +50,7 @@ func RegisterPage(server string) {
 				return
 			}
 
-			token, err := services.Register(username, password, firstName, lastName, server)
+			token, err := services.Register(username, password, firstName, lastName)
 
 			if err != nil {
 				showModal(err.Error())

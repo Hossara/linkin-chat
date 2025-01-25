@@ -14,13 +14,14 @@ var joinCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		server, _ := cmd.Flags().GetString("server")
 
+		viper.Set("server", server)
 		username := viper.GetString("login.username")
 		password := viper.GetString("login.password")
 
 		if username == "" || password == "" {
-			pages.LoginPage(server)
+			pages.LoginPage()
 		} else {
-			token, err := services.Login(username, password, server)
+			token, err := services.Login(username, password)
 
 			viper.Set("login.token", token)
 
@@ -33,7 +34,7 @@ var joinCmd = &cobra.Command{
 					return
 				}
 
-				pages.LoginPage(server)
+				pages.LoginPage()
 			}
 		}
 
@@ -43,7 +44,7 @@ var joinCmd = &cobra.Command{
 			log.Fatalf("Token is empty! Something wrong with configuration file!")
 		}
 
-		pages.HomePage(server, token)
+		pages.HomePage()
 
 	},
 }
