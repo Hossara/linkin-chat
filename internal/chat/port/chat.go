@@ -14,8 +14,8 @@ type ChatRepo interface {
 	GenerateNewCode(ctx context.Context) (chatDomain.ChatRoomCode, error)
 
 	FindAllByUserID(ctx context.Context, userID userDomain.UserID) ([]*chatDomain.ChatRoom, error)
-	InsertUserToChat(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID)
-	DeleteUserFromChat(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID)
+	InsertUserToChat(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID) error
+	DeleteUserFromChat(ctx context.Context, code chatDomain.ChatRoomCode, userID userDomain.UserID) error
 
 	RunMigrations() error
 }

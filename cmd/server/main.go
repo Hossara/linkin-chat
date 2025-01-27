@@ -27,8 +27,6 @@ func main() {
 
 	appContainer := app.MustNewApp(c)
 
-	fmt.Printf("%v\n", c.Server)
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 

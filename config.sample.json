@@ -6,7 +6,9 @@
   },
   "nats": {
     "host": "localhost",
-    "port": "4222"
+    "port": "4222",
+    "username": "server",
+    "password": "password1234"
   },
   "redis": {
     "host": "localhost",
